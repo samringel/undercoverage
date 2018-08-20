@@ -8,46 +8,66 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.stream.Stream;
 
+/** Immutable representation of request to newspai.org */
 public class NewsReaderRequestModel {
-  private final String url = "https://newsapi.org/v2/everything?q=\"%s\"&sources=%s&from=%s&apiKey=%s";
+  private static final String url = "https://newsapi.org/v2/everything?sources=%s&from=%s&apiKey=%s";
+  private static final String termParam = "&q=\"%s\"";
 
-  private String term;
-  private String[] sources;
-  private String date;
+  private final String term; //nullable
+  private final String source;
+  private final String date;
 
-  public NewsReaderRequestModel(String term, String[] sources) {
-    setTerm(term);
-    setSources(sources);
-    initDate();
+  private NewsReaderRequestModel(String term, String source) {
+    if (term != null) {
+      this.term = encodeParam(term);
+    } else {
+      this.term = null;
+    }
+    this.source = encodeParam(source);
+    date = getNewDate();
   }
 
   /**
-   * Builds url for newsapi.org request from fields in class
+   * Build newsapi.org request model for searching news source by term
+   *
+   * @param term term to search for
+   * @param source news source id
+   * @return built request model
+   */
+  public static NewsReaderRequestModel buildTermSearch(String term, String source) {
+    return new NewsReaderRequestModel(term, source);
+  }
+
+  /**
+   * Build newsapi.org request model for searching all articles from news source
+   *
+   * @param source news source id
+   * @return built request model
+   */
+  public static NewsReaderRequestModel buildSearch(String source) {
+    return new NewsReaderRequestModel(null, source);
+  }
+
+
+  /**
+   * Gets url for newsapi.org request from fields in class
    *
    * @param apiKey API key for newsapi.org request
-   * @return built url from fields
+   * @return url from fields
    */
-  public URL buildUrl(String apiKey) {
-    String sourcesString = String.join(",", sources);
+  public URL getUrl(String apiKey) {
     try {
-      return new URL(String.format(url, term, sourcesString, date, apiKey));
+      String builtUrl = String.format(url, source, date, apiKey);
+      if (term != null) {
+        builtUrl = builtUrl.concat(String.format(termParam, term));
+      }
+      return new URL(builtUrl);
     } catch (MalformedURLException e) {
       System.err.println("Error building request url. Contact the developer if this problem persists.");
       System.exit(1);
       return null;
     }
-  }
-
-  private void setTerm(String term) {
-    this.term = encodeParam(term);
-  }
-
-  private void setSources(String[] sources) {
-    this.sources = Stream.of(sources)
-        .map(this::encodeParam)
-        .toArray(String[]::new);
   }
 
   /**
@@ -67,15 +87,17 @@ public class NewsReaderRequestModel {
   }
 
   /**
-   * Sets {@code date} to 1 month before current instant in ISO 8601 format
+   * Gets date of 1 month before current instant in ISO 8601 format
+   *
+   * @return calculated date
    */
-  private void initDate() {
+  private String getNewDate() {
     //while newsapi.org documentation says results from over a month ago will not be returned,
     //actual results have included ones from earlier - this ensures a consistent range among calls
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.MONTH, -1);
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    date = dateFormat.format(calendar.getTime());
+    return dateFormat.format(calendar.getTime());
   }
 }

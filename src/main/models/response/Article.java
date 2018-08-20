@@ -2,7 +2,7 @@ package main.models.response;
 
 /** Model for element of articles field in newsapi.org ok response */
 public class Article {
-  private Source source;
+  private BriefSource source;
   private String author;
   private String title;
   private String description;
@@ -10,7 +10,7 @@ public class Article {
   private String urlToImage;
   private String publishedAt;
 
-  public Source getSource() {
+  public BriefSource getSource() {
     return source;
   }
 
@@ -38,7 +38,7 @@ public class Article {
     return publishedAt;
   }
 
-  public void setSource(Source source) {
+  public void setSource(BriefSource source) {
     this.source = source;
   }
 

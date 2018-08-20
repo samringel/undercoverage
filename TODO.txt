@@ -1,0 +1,5 @@
+1. Add JUnit dependency and write test cases
+2. Add map of normalized outlets names to formatted ones
+3. Allow users to input as many outlets as they want
+4. Implement suggestions for source mispellings
+5. Source autocomplete

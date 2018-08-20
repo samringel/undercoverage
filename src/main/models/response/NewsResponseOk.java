@@ -1,15 +1,12 @@
 package main.models.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /** Model for newsapi.org ok response */
-public class NewsResponseOk implements NewsResponse {
-  private String status = "ok";
+@JsonIgnoreProperties(value={"status"})
+public class NewsResponseOk {
   private int totalResults;
   private Article[] articles;
-
-  @Override
-  public String getStatus() {
-    return status;
-  }
 
   public int getTotalResults() {
     return totalResults;
@@ -17,11 +14,6 @@ public class NewsResponseOk implements NewsResponse {
 
   public Article[] getArticles() {
     return articles;
-  }
-
-  @Override
-  public void setStatus(String status) {
-    this.status = status;
   }
 
   public void setTotalResults(int totalResults) {
